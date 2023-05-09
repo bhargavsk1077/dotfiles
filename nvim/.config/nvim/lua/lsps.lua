@@ -1,24 +1,36 @@
--- lsp-installer begin
-local lsp_installer = require("nvim-lsp-installer")
+require('mason_conf')
 
--- Register a handler that will be called for all installed servers.
-lsp_installer.on_server_ready(function(server)
-    local opts = vim.tbl_deep_extend("force", require("lsp").common_opts, {})
+local lspconfig = require'lspconfig'
 
-    -- ignore the ones that are setup manually later, with more options and stuff
-    if server.name == "efm" or server.name == "sumneko_lua" or server.name == "gopls" or server.name == "rust_analyzer" then
-        return
-    end
+local nlspsettings = require("nlspsettings")
 
-    -- This setup() function is exactly the same as lspconfig's setup function.
-    -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
-    server:setup(opts)
-end)
+nlspsettings.setup({
+    config_home = vim.fn.stdpath('config') .. '/nlsp-settings',
+    local_settings_dir = ".nlsp-settings",
+    local_settings_root_markers_fallback = { '.git' },
+    append_default_schemas = true,
+    loader = 'json'
+})
 
--- lsp-installer end
-
-require('lsp.lua-ls')
-require('lsp.go-ls')
-require('lsp.rust-ls')
-require('lsp.efm-ls')
-
+require("mason-lspconfig").setup_handlers {
+    -- The first entry (without a key) will be the default handler
+    -- and will be called for each installed server that doesn't have
+    -- a dedicated handler.
+    function (server_name) -- default handler (optional)
+        local opts = vim.tbl_deep_extend("force", require("lsp").common_opts(), {})
+        lspconfig[server_name].setup(opts)
+    end,
+    -- Next, you can provide a dedicated handler for specific servers.
+    ["efm"] = function ()
+         require('lsp.efm-ls')
+    end,
+    ["lua_ls"] = function ()
+         require('lsp.lua-ls')
+    end,
+    ["gopls"] = function ()
+         require('lsp.go-ls')
+    end,
+    ["rust_analyzer"] = function ()
+          require('lsp.rust-ls')
+    end,
+}

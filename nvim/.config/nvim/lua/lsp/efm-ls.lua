@@ -1,5 +1,6 @@
 -- Stolen from: https://github.com/ChristianChiarulli/LunarVim/blob/master/lua/lsp/efm-general-ls.lua
 -- Example configuations here: https://github.com/mattn/efm-langserver
+
 -- python
 local python_arguments = {}
 
@@ -68,13 +69,23 @@ local eslint = {
     formatStdin = true
 }
 
+local eslint_d = {
+    lintCommand = "eslint_d --cache -f unix --stdin --stdin-filename ${INPUT}",
+    lintIgnoreExitCode = true,
+    lintStdin = true,
+    lintFormats = {"%f:%l:%c: %m"},
+    -- formatCommand = "eslint_d --fix-to-stdout --stdin --stdin-filename=${INPUT}",
+    -- formatStdin = true
+}
+
 local tsserver_args = {}
 
 local tsserver_formatter = 'prettier'
 if tsserver_formatter == 'prettier' then table.insert(tsserver_args, prettier) end
 
-local tsserver_linter = 'eslint'
+local tsserver_linter = 'eslint_d'
 if tsserver_linter == 'eslint' then table.insert(tsserver_args, eslint) end
+if tsserver_linter == 'eslint_d' then table.insert(tsserver_args, eslint_d) end
 
 -- local markdownlint = {
 --     -- TODO default to global lintrc
@@ -86,48 +97,36 @@ if tsserver_linter == 'eslint' then table.insert(tsserver_args, eslint) end
 
 local markdownPandocFormat = {formatCommand = 'pandoc -f markdown -t gfm -sp --tab-stop=2', formatStdin = true}
 
-local lsp_installer_servers = require 'nvim-lsp-installer.servers'
-
-local server_available, requested_server = lsp_installer_servers.get_server("efm")
-
-if server_available then
-    requested_server:on_ready(function()
-        local opts = vim.tbl_deep_extend("force", require("lsp").common_opts, {
-            -- cmd = {vim.fn.stdpath('data') .. "/lspinstall/efm/efm-langserver"},
-            -- init_options = {initializationOptions},
-            init_options = {documentFormatting = true, codeAction = true},
-            settings = {
-                rootMarkers = {".git/"},
-                languages = {
-                    python = python_arguments,
-                    lua = lua_arguments,
-                    sh = sh_arguments,
-                    javascript = tsserver_args,
-                    javascriptreact = tsserver_args,
-                    typescript = tsserver_args,
-                    typescriptreact = tsserver_args,
-                    html = {prettier},
-                    css = {prettier},
-                    json = {prettier},
-                    yaml = {prettier},
-                    markdown = {markdownPandocFormat}
-                    -- javascriptreact = {prettier, eslint},
-                    -- javascript = {prettier, eslint},
-                    -- markdown = {markdownPandocFormat, markdownlint},
-                }
-            },
-            filetypes = {
-                "lua", "python", "javascriptreact", "javascript", "typescript", "typescriptreact", "sh", "html", "css",
-                "json", "yaml", "markdown", "vue"
-            },
-        })
-        requested_server:setup(opts)
-    end)
-    if not requested_server:is_installed() then
-        -- Queue the server to be installed
-        requested_server:install()
-    end
-end
+local opts = vim.tbl_deep_extend("force", require("lsp").common_opts(), {
+    -- cmd = {vim.fn.stdpath('data') .. "/lspinstall/efm/efm-langserver"},
+    -- init_options = {initializationOptions},
+    init_options = {documentFormatting = true, codeAction = true},
+    settings = {
+        rootMarkers = {".git/"},
+        languages = {
+            python = python_arguments,
+            lua = lua_arguments,
+            sh = sh_arguments,
+            javascript = tsserver_args,
+            javascriptreact = tsserver_args,
+            typescript = tsserver_args,
+            typescriptreact = tsserver_args,
+            html = {prettier},
+            css = {prettier},
+            json = {prettier},
+            yaml = {prettier},
+            markdown = {markdownPandocFormat}
+            -- javascriptreact = {prettier, eslint},
+            -- javascript = {prettier, eslint},
+            -- markdown = {markdownPandocFormat, markdownlint},
+        }
+    },
+    filetypes = {
+        "lua", "python", "javascriptreact", "javascript", "typescript", "typescriptreact", "sh", "html", "css",
+        "json", "yaml", "markdown", "vue"
+    },
+})
+require'lspconfig'["efm"].setup(opts)
 
 -- Also find way to toggle format on save
 -- maybe this will help: https://superuser.com/questions/439078/how-to-disable-autocmd-or-augroup-in-vim
