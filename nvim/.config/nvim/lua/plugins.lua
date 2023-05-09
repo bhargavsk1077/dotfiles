@@ -136,12 +136,12 @@ return require('packer').startup(function(use)
     -- use 'axvr/photon.vim'
     -- use 'danilo-augusto/vim-afterglow'
     -- use "rafamadriz/neon"
-    -- use {
-    --     "rebelot/kanagawa.nvim",
-    --     config = function()
-    --         vim.cmd("colorscheme kanagawa")
-    --     end
-    -- }
+    use {
+        "rebelot/kanagawa.nvim",
+        config = function()
+            vim.cmd("colorscheme kanagawa")
+        end
+    }
     -- use {
     --     "glepnir/zephyr-nvim",
     --     config = function()
@@ -177,14 +177,14 @@ return require('packer').startup(function(use)
     --         vim.cmd("colorscheme pink-panic")
     --     end
     -- }
-    use {
-        'mcchrish/zenbones.nvim',
-        requires = { 'rktjmp/lush.nvim' },
-        config = function()
-            -- vim.cmd("colorscheme forestbones")
-            vim.cmd("colorscheme tokyobones")
-        end
-    }
+    -- use {
+    --     'mcchrish/zenbones.nvim',
+    --     requires = { 'rktjmp/lush.nvim' },
+    --     config = function()
+    --         -- vim.cmd("colorscheme forestbones")
+    --         vim.cmd("colorscheme tokyobones")
+    --     end
+    -- }
 
     -- file tree
     use {
